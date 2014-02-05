@@ -1,0 +1,25 @@
+// IA de déplacement 
+
+loop(){
+	// si obstacle 
+		// stop
+		choixDirection()
+	// sinon avance
+}
+
+choixDirection(){
+	scanDirection()
+	// si la distance à droite et à gauche est courte alors
+		// fait demi tour
+	// sinon
+		// si la distance à droite et plus courte alors
+			// tourne à droite
+		// sinon tourne à gauche
+			// tourne à gauche
+}
+
+scanDirection(){
+	// prend la distance a droite
+	// prend la distance a gauche
+	// se remet droit
+}
