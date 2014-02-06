@@ -1,14 +1,17 @@
 // IA de déplacement 
+int DEVANT = 0;
+int DROITE = 90;
+int GAUCHE = -90;
 
 loop(){
 	// si obstacle 
 		// stop
-		choixDirection()
+		choixDirection();
 	// sinon avance
 }
 
 choixDirection(){
-	scanDirection()
+	scanDirection();
 	// si la distance à droite et à gauche est courte alors
 		// fait demi tour
 	// sinon
@@ -20,6 +23,25 @@ choixDirection(){
 
 scanDirection(){
 	// prend la distance a droite
+	int distanceDroite = regardeVers(DROITE, true);
 	// prend la distance a gauche
+	int distanceGauche= regardeVers(GAUCHE, true);
 	// se remet droit
+	int noNeed = regardeVers(DEVANT);
+}
+
+/*
+* Si retourne valeur et true alors renvois la distance dans cette direction
+*/
+int regardeVers(angle, retourneValeur=false){
+	// tourne vers l'angle donné
+	// si retourneValeur == true 
+		// retourne la distance dans cette direction
+		return detecteDistance();
+	// sinon
+		// retourne 0;
+}
+
+int detecteDistance(){
+	// prend la mesure
 }
