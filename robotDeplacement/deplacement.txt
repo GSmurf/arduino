@@ -1,7 +1,19 @@
-// IA de déplacement 
-int DEVANT = 0;
-int DROITE = 90;
-int GAUCHE = -90;
+/*
+* IA de déplacement du robot
+*/
+const int pinLectureDistance = 0;
+
+// Constante du programme
+const int DEVANT = 0;
+const int DROITE = 90;
+const int GAUCHE = -90;
+
+const int VERY_CLOSE 	= 0;
+const int CLOSE		= 1;
+const int FAR		= 2;
+const int NOTHING	= 3;
+
+
 
 loop(){
 	// si obstacle 
@@ -42,6 +54,16 @@ int regardeVers(angle, retourneValeur=false){
 		// retourne 0;
 }
 
-int detecteDistance(){
-	// prend la mesure
+// prend la mesure
+int detecteDistance() {
+	int x = analogRead(pinLectureDistance);
+	if(x > 400) {
+		return VERY_CLOSE;
+	} else if(x > 300) {
+		return CLOSE;
+	} else if(x > 200) {
+		return FAR;
+	} else {
+		return NOTHING;
+	}
 }
