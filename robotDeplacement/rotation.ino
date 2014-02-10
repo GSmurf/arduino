@@ -26,33 +26,32 @@ void setup(){ //void setup start
     pinMode(servopin,OUTPUT);
 }// void setup end
 
+/******************************************
+Use the variable currentPosition to 
+turn the servo motor
+
+The next four lines of codes are the basic 
+to run the servo motor. The delayMicroseconds
+can hold value from 500(0 degrees) to 
+2500(180 degrees)
+******************************************/
 void rotate(){//void rotate start
-    /******************************************
-    Use the variable currentPosition to 
-    turn the servo motor
-    
-    The next four lines of codes are the basic 
-    to run the servo motor. The delayMicroseconds
-    can hold value from 500(0 degrees) to 
-    2500(180 degrees)
-    ******************************************/
     digitalWrite(servopin,HIGH);
     delayMicroseconds(currentPosition);
     digitalWrite(servopin,LOW);
     delayMicroseconds(20);
 }//void rotate end
 
+/******************************************
+Set of command to assign value to variable
+commandPosition. Open the serial monitor and
+letter a,b,c,d,e consecutively.
+
+The commandPosition variable can be assigned
+with any value from analog sensor such as 
+temperature and potentiometer. 
+******************************************/
 void loop(){// void loop start
-    
-    /******************************************
-    Set of command to assign value to variable
-    commandPosition. Open the serial monitor and
-    letter a,b,c,d,e consecutively.
-    
-    The commandPosition variable can be assigned
-    with any value from analog sensor such as 
-    temperature and potentiometer. 
-    ******************************************/
      if (Serial.available() > 0) { //if serial available start
         int data = Serial.read();
     
