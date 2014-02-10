@@ -9,6 +9,12 @@ const int pinLectureDistance = 0;
 const int DEVANT = 0;
 const int DROITE = 90;
 const int GAUCHE = -90;
+const int DEMITOUR = 180;
+
+
+// Distances percues par le robot
+int DIST_DROITE = 0;
+int DIST_GAUCHE = 0;
 
 // Constantes de distance
 const int VERY_CLOSE 	= 0;
@@ -17,6 +23,9 @@ const int FAR		= 2;
 const int NOTHING	= 3;
 
 
+void setup(){ //void setup start
+    scanDirection();
+}// void setup end
 
 loop(){
 	// si obstacle 
@@ -25,22 +34,29 @@ loop(){
 	// sinon avance
 }
 
-choixDirection(){
+void choixDirection(){
 	scanDirection();
 	// si la distance à droite et à gauche est courte alors
+	if((DIST_DROITE == VERY_CLOSE) && (DIST_GAUCHE == VERY_CLOSE)){
 		// fait demi tour
-	// sinon
+		tourneRobot(DEMITOUR);
+	}else{
 		// si la distance à droite et plus courte alors
+		if(DIST_DROITE < DIST_GAUCHE){
 			// tourne à droite
-		// sinon tourne à gauche
+			tourneRobot(DROITE);
+		}else{
 			// tourne à gauche
+			tourneRobot(GAUCHE);
+		}
+	}
 }
 
-scanDirection(){
+int scanDirection(){
 	// prend la distance a droite
-	int distanceDroite = regardeVers(DROITE, true);
+	DIST_DROITE = regardeVers(DROITE, true);
 	// prend la distance a gauche
-	int distanceGauche= regardeVers(GAUCHE, true);
+	DIST_GAUCHE = regardeVers(GAUCHE, true);
 	// se remet droit
 	int noNeed = regardeVers(DEVANT);
 }
@@ -50,6 +66,7 @@ scanDirection(){
 */
 int regardeVers(int angle, retourneValeur=false){
 	// tourne vers l'angle donné
+	// TODO demander au servo moteur de tourner selon l'angle
 	if(retourneValeur == true){
 		// retourne la distance dans cette direction
 		return detecteDistance();
@@ -71,4 +88,9 @@ int detecteDistance() {
 	} else {
 		return NOTHING;
 	}
+}
+
+// demande aux moteurs d'effectuer le travail pour faire tourner le robot comme désiré
+void tourneRobot(int direction){
+	// TODO
 }
