@@ -1,3 +1,4 @@
+// site : http://goo.gl/IetFQU
 // attach red wire to 5 volts
 // attach black wire to  ground
 // attach the yellow wire pin 8
