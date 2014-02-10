@@ -2,12 +2,15 @@
 * IA de déplacement du robot
 */
 const int pinLectureDistance = 0;
-
-// Constante du programme
+/*
+* Constantes du programme
+*/
+// Constantes de direction
 const int DEVANT = 0;
 const int DROITE = 90;
 const int GAUCHE = -90;
 
+// Constantes de distance
 const int VERY_CLOSE 	= 0;
 const int CLOSE		= 1;
 const int FAR		= 2;
@@ -45,13 +48,15 @@ scanDirection(){
 /*
 * Si retourne valeur et true alors renvois la distance dans cette direction
 */
-int regardeVers(angle, retourneValeur=false){
+int regardeVers(int angle, retourneValeur=false){
 	// tourne vers l'angle donné
-	// si retourneValeur == true 
+	if(retourneValeur == true){
 		// retourne la distance dans cette direction
 		return detecteDistance();
-	// sinon
+	}else{
 		// retourne 0;
+		return VERY_CLOSE;
+	}
 }
 
 // prend la mesure
