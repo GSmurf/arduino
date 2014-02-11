@@ -27,7 +27,7 @@ void setup(){ //void setup start
     scanDirection();
 }// void setup end
 
-loop(){
+void loop(){
 	// si obstacle 
 		// stop
 		choixDirection();
@@ -52,19 +52,10 @@ void choixDirection(){
 	}
 }
 
-int scanDirection(){
-	// prend la distance a droite
-	DIST_DROITE = regardeVers(DROITE, true);
-	// prend la distance a gauche
-	DIST_GAUCHE = regardeVers(GAUCHE, true);
-	// se remet droit
-	int noNeed = regardeVers(DEVANT);
-}
-
 /*
 * Si retourne valeur et true alors renvois la distance dans cette direction
 */
-int regardeVers(int angle, retourneValeur=false){
+int regardeVers(int angle, boolean retourneValeur=false){
 	// tourne vers l'angle donné
 	// TODO demander au servo moteur de tourner selon l'angle
 	if(retourneValeur == true){
@@ -75,6 +66,16 @@ int regardeVers(int angle, retourneValeur=false){
 		return VERY_CLOSE;
 	}
 }
+
+int scanDirection(){
+	// prend la distance a droite
+	DIST_DROITE = regardeVers(DROITE, true);
+	// prend la distance a gauche
+	DIST_GAUCHE = regardeVers(GAUCHE, true);
+	// se remet droit
+	int noNeed = regardeVers(DEVANT);
+}
+
 
 // prend la mesure
 int detecteDistance() {
