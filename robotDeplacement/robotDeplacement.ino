@@ -8,11 +8,16 @@ Servo myservo;  // create servo object to control a servo
 const int PIN_LECTURE_DISTANCE = 0;
 const int PIN_SERVO_MOTOR = 9;
 
+// DEBUG MODE
+const boolean DEBUG = true;
+const int TEMPS_CYCLE = 4; // EN SECONDES
+
 // variable to store the servo position
 int pos = 0;     
 // Distances percues par le robot
 int distDroite = 0;
 int distGauche = 0;
+int distDevant = 0;
 
 /*
 * Constantes du programme
@@ -32,15 +37,34 @@ const int NOTHING	= 3;
 /* ------------------------------------------------------------------------
 * Mes fonctions
 ------------------------------------------------------------------------ */
+void debug(String texte){
+  Serial.print("*** ");
+  Serial.print(texte);
+  Serial.println(" ***");
+  Serial.print("Droite : ");
+  Serial.println(distDroite);
+  Serial.print("Gauche : ");
+  Serial.println(distGauche);
+  Serial.print("Devant : ");
+  Serial.println(distDevant);
+  Serial.print("Position : ");
+  Serial.println(pos);
+  Serial.println("---");
+}
+
 int regardeVers(int angle, boolean retourneValeur=false){
+        pos = angle;
 	// tourne vers l'angle donné
-	myservo.write(angle);
-	delay(500); // TODO : Optimiser ce timing pour être le plus bref posible tout en lui laissant le temps
+        digitalWrite(PIN_SERVO_MOTOR,HIGH);
+	myservo.write(pos);
+        digitalWrite(PIN_SERVO_MOTOR,LOW);
+	delay(450); // ce timing est le plus bref posible tout en lui laissant le temps !
 	if(retourneValeur == true){
 		// retourne la distance dans cette direction
 		return detecteDistance();
 	}else{
 		// retourne 0;
+                if(pos == DEVANT)return NOTHING; // T
 		return VERY_CLOSE;
 	}
 }
@@ -72,13 +96,18 @@ int scanDirection(){
 	// prend la distance a gauche
 	distGauche = regardeVers(GAUCHE, true);
 	// se remet droit
-	int noNeed = regardeVers(DEVANT);
+	distDevant = regardeVers(DEVANT);
+
+        if(DEBUG)debug("scanDirection");
 }
 
 // prend la mesure
 int detecteDistance() {
-	int x = analogRead(PIN_LECTURE_DISTANCE);
-	if(x > 400) {
+  // TODO mettre en place la lecture de la distance
+//	int x = analogRead(PIN_LECTURE_DISTANCE); 
+        int x = 401;
+        
+        if(x > 400) {
 		return VERY_CLOSE;
 	} else if(x > 300) {
 		return CLOSE;
@@ -98,14 +127,16 @@ void tourneRobot(int direction){
 * Lancement du programme
 ------------------------------------------------------------------------ */
 void setup(){ //void setup start
-	myservo.attach(PIN_SERVO_MOTOR);  // attaches the servo on pin 9 to the servo object            // in steps of 1 degree 
-	regardeVers(DEVANT);
-    scanDirection();
+  if(DEBUG)Serial.begin(9600);
+  myservo.attach(PIN_SERVO_MOTOR);  // attaches the servo on pin 9 to the servo object            // in steps of 1 degree 
+  regardeVers(DEVANT);
 }// void setup end
 
-void loop(){
-	// si obstacle 
-		// stop
-		choixDirection();
-	// sinon avance
+void loop(){  
+  // si obstacle 
+    // stop
+    choixDirection();
+  // sinon avance 
+  
+  delay(TEMPS_CYCLE*1000); // toutes les 10 secs
 }
