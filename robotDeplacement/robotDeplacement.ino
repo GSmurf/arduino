@@ -38,9 +38,9 @@ const int NOTHING	= 3;
 * Mes fonctions
 ------------------------------------------------------------------------ */
 void debug(String texte){
-  Serial.print("*** ");
-  Serial.print(texte);
-  Serial.println(" ***");
+  String titre = "*** "+texte+" ***";
+  Serial.println(titre);
+  
   Serial.print("Droite : ");
   Serial.println(distDroite);
   Serial.print("Gauche : ");
@@ -49,22 +49,23 @@ void debug(String texte){
   Serial.println(distDevant);
   Serial.print("Position : ");
   Serial.println(pos);
+  
   Serial.println("---");
 }
 
 int regardeVers(int angle, boolean retourneValeur=false){
-        pos = angle;
+  pos = angle;
 	// tourne vers l'angle donné
-        digitalWrite(PIN_SERVO_MOTOR,HIGH);
+  digitalWrite(PIN_SERVO_MOTOR,HIGH);
 	myservo.write(pos);
-        digitalWrite(PIN_SERVO_MOTOR,LOW);
+  digitalWrite(PIN_SERVO_MOTOR,LOW);
 	delay(450); // ce timing est le plus bref posible tout en lui laissant le temps !
 	if(retourneValeur == true){
 		// retourne la distance dans cette direction
 		return detecteDistance();
 	}else{
 		// retourne 0;
-                if(pos == DEVANT)return NOTHING; // T
+    if(pos == DEVANT)return NOTHING; // TODO : virer ce test une fois le projet plus avancé
 		return VERY_CLOSE;
 	}
 }
@@ -98,16 +99,16 @@ int scanDirection(){
 	// se remet droit
 	distDevant = regardeVers(DEVANT);
 
-        if(DEBUG)debug("scanDirection");
+  if(DEBUG)debug("scanDirection");
 }
 
 // prend la mesure
 int detecteDistance() {
   // TODO mettre en place la lecture de la distance
 //	int x = analogRead(PIN_LECTURE_DISTANCE); 
-        int x = 401;
-        
-        if(x > 400) {
+    int x = 401;
+  
+  if(x > 400) {
 		return VERY_CLOSE;
 	} else if(x > 300) {
 		return CLOSE;
