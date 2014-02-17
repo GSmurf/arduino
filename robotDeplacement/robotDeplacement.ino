@@ -37,6 +37,39 @@ const int NOTHING	= 3;
 /* ------------------------------------------------------------------------
 * Mes fonctions
 ------------------------------------------------------------------------ */
+int scanDirection(){
+	// prend la distance a droite
+	distDroite = regardeVers(DROITE, true);
+	// prend la distance a gauche
+	distGauche = regardeVers(GAUCHE, true);
+	// se remet droit
+	distDevant = regardeVers(DEVANT);
+
+  if(DEBUG)debug("scanDirection");
+}
+
+// prend la mesure
+int detecteDistance() {
+  // TODO mettre en place la lecture de la distance
+//	int x = analogRead(PIN_LECTURE_DISTANCE); 
+    int x = 401;
+  
+  if(x > 400) {
+		return VERY_CLOSE;
+	} else if(x > 300) {
+		return CLOSE;
+	} else if(x > 200) {
+		return FAR;
+	} else {
+		return NOTHING;
+	}
+}
+
+// demande aux moteurs d'effectuer le travail pour faire tourner le robot comme désiré
+void tourneRobot(int direction){
+	// TODO
+}
+
 void debug(String texte){
   String titre = "*** "+texte+" ***";
   Serial.println(titre);
@@ -91,53 +124,27 @@ void choixDirection(){
 	}
 }
 
-int scanDirection(){
-	// prend la distance a droite
-	distDroite = regardeVers(DROITE, true);
-	// prend la distance a gauche
-	distGauche = regardeVers(GAUCHE, true);
-	// se remet droit
-	distDevant = regardeVers(DEVANT);
 
-  if(DEBUG)debug("scanDirection");
-}
 
-// prend la mesure
-int detecteDistance() {
-  // TODO mettre en place la lecture de la distance
-//	int x = analogRead(PIN_LECTURE_DISTANCE); 
-    int x = 401;
-  
-  if(x > 400) {
-		return VERY_CLOSE;
-	} else if(x > 300) {
-		return CLOSE;
-	} else if(x > 200) {
-		return FAR;
-	} else {
-		return NOTHING;
-	}
-}
 
-// demande aux moteurs d'effectuer le travail pour faire tourner le robot comme désiré
-void tourneRobot(int direction){
-	// TODO
-}
 
 /* ------------------------------------------------------------------------
 * Lancement du programme
 ------------------------------------------------------------------------ */
 void setup(){ //void setup start
   if(DEBUG)Serial.begin(9600);
-  myservo.attach(PIN_SERVO_MOTOR);  // attaches the servo on pin 9 to the servo object            // in steps of 1 degree 
+  myservo.attach(PIN_SERVO_MOTOR);  // attaches the servo on pin 9 to the servo object
   regardeVers(DEVANT);
 }// void setup end
 
-void loop(){  
-  // si obstacle 
-    // stop
-    choixDirection();
-  // sinon avance 
-  
-  delay(TEMPS_CYCLE*1000); // toutes les 10 secs
+void loop(){ 
+    // si obstacle
+    If(1 == 1){
+        // stop
+        choixDirection();
+    }else{
+        // sinon avance
+    } 
+      
+  delay(TEMPS_CYCLE*1000); // donne un délai d'exécution pour les cycles
 }
