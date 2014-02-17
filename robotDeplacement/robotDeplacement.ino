@@ -37,11 +37,10 @@ int distDevant = TRES_PRES;
 ------------------------------------------------------------------------ */
 // prend la mesure
 int detecteDistance() {
-  // TODO mettre en place la lecture de la distance
+  // Lecture de la distance
   int x = analogRead(PIN_LECTURE_DISTANCE); 
   Serial.print("PIN_LECTURE_DISTANCE : ");
   Serial.println(x);
-//  int x = 401;
   
   if(x > 400) {
     return TRES_PRES;
