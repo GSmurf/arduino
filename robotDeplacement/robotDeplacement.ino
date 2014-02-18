@@ -35,10 +35,47 @@ int distDevant = TRES_PRES;
 /* ------------------------------------------------------------------------
 * Mes fonctions
 ------------------------------------------------------------------------ */
+/*
+* The speed of sound is 340 m/s or 29 microseconds per centimeter.
+* The ping travels out and back, so to find the distance of the
+* object we take half of the distance travelled.
+*/
+long microsecondsToCentimeters(long microseconds)
+{
+  return microseconds / 29 / 2;
+}
+
+/*
+* Retourne la distance en durée, sinon posible en centimetre
+* cf : http://goo.gl/0Co9nL
+*/
+long litDistance(boolean retourEnCm = false){
+  long duration;
+  pinMode(PIN_LECTURE_DISTANCE, OUTPUT);
+  digitalWrite(PIN_LECTURE_DISTANCE, LOW);
+  delayMicroseconds(2);
+  digitalWrite(PIN_LECTURE_DISTANCE, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(PIN_LECTURE_DISTANCE, LOW);
+
+  // The same pin is used to read the signal from the PING))): a HIGH
+  // pulse whose duration is the time (in microseconds) from the sending
+  // of the ping to the reception of its echo off of an object.
+  pinMode(PIN_LECTURE_DISTANCE, INPUT);
+  duration = pulseIn(PIN_LECTURE_DISTANCE, HIGH);
+  
+  if(retourEnCm){
+    return microsecondsToCentimeters(duration);
+  }else{
+    return duration;
+  }
+}
+
 // prend la mesure
 int detecteDistance() {
   // Lecture de la distance
-  int x = analogRead(PIN_LECTURE_DISTANCE); 
+  // int x = analogRead(PIN_LECTURE_DISTANCE); 
+  int x = litDistance();
   Serial.print("PIN_LECTURE_DISTANCE : ");
   Serial.println(x);
   
@@ -80,8 +117,10 @@ int scanDirection(){
   if(DEBUG)debug("scanDirection");
 }
 
-
-// demande aux moteurs d'effectuer le travail pour faire tourner le robot comme désiré
+/*
+* Demande aux moteurs d'effectuer le travail pour faire tourner le robot comme désiré
+* Fonctionnement du moteur http://goo.gl/CQJaXp
+*/
 void tourneRobot(int direction){
   // TODO
 }
