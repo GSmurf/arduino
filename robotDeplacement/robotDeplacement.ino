@@ -11,7 +11,7 @@ const int PIN_MOTEUR1_PW = 3; // Lien PWR
 const int PIN_MOTEUR2_PW = 11; // Lien PWR
 const int PIN_MOTEUR1_DIR = 12;
 const int PIN_MOTEUR2_DIR = 13;
-const int PIN_MOTEUR1_BRK = 9;
+const int PIN_MOTEUR1_BRK = 10;
 const int PIN_MOTEUR2_BRK = 8;
 
 // DEBUG MODE
@@ -265,9 +265,17 @@ void choixDirection(){
 void setup(){
   pinMode(PIN_LECTURE_DISTANCE, INPUT);
   pinMode(PIN_SERVO_MOTEUR, OUTPUT);
+
+  pinMode(PIN_MOTEUR1_PW, OUTPUT);  //Set control pins to be outputs
+  pinMode(PIN_MOTEUR2_PW, OUTPUT);
+  pinMode(PIN_MOTEUR1_DIR, OUTPUT);
+  pinMode(PIN_MOTEUR2_DIR, OUTPUT);
+   
   myservo.attach(PIN_SERVO_MOTEUR);  // attaches the servo on pin 9 to the servo object
   if(DEBUG)Serial.begin(9600);
   regardeVers(DEVANT);
+  moteurFreins(false);
+  stop();
 }
 
 void loop(){ 
