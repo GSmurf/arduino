@@ -4,12 +4,20 @@
 #include <Servo.h> 
  
 Servo myservo;  // create servo object to control a servo 
-const int PIN_LECTURE_DISTANCE = 0;
+const int PIN_LECTURE_DISTANCE = 0; // analogique
 const int PIN_SERVO_MOTEUR = 9;
+
+const int PIN_MOTEUR1_PW = 3; // Lien PWR
+const int PIN_MOTEUR2_PW = 11; // Lien PWR
+const int PIN_MOTEUR1_DIR = 12;
+const int PIN_MOTEUR2_DIR = 13;
+const int PIN_MOTEUR1_BRK = 9;
+const int PIN_MOTEUR2_BRK = 8;
 
 // DEBUG MODE
 const boolean DEBUG = true;
 const int TEMPS_CYCLE = 4; // EN SECONDES
+const int TEMPS_ROTATION = 2000; // TODO regler ce timing en milliseconde pour pouvoir être précis
 
 /*
 * Constantes du programme
@@ -32,6 +40,40 @@ int pos = DEVANT;
 int distDroite = TRES_PRES;
 int distGauche = TRES_PRES;
 int distDevant = TRES_PRES;
+
+/* ------------------------------------------------------------------------
+* Code moteur
+------------------------------------------------------------------------ */
+const int STOP = 0;
+const int LENT = 50;
+const int MOYEN = 75;
+const int RAPIDE = 100;
+
+void moteurVitesse(int left, int right) {
+  analogWrite(PIN_MOTEUR1_PW, left);
+  analogWrite(PIN_MOTEUR2_PW, right);
+}
+
+void moteurEnArriere() {
+  digitalWrite(PIN_MOTEUR1_DIR,HIGH);
+  digitalWrite(PIN_MOTEUR2_DIR,HIGH);
+}
+
+void moteurEnAvant() {
+  digitalWrite(PIN_MOTEUR1_DIR,LOW);
+  digitalWrite(PIN_MOTEUR2_DIR,LOW);
+}
+
+void moteurFreins(boolean active = true) {
+  if(active){
+    digitalWrite(PIN_MOTEUR1_BRK,HIGH);
+    digitalWrite(PIN_MOTEUR2_BRK,HIGH);
+  }else{
+    digitalWrite(PIN_MOTEUR1_BRK,LOW);
+    digitalWrite(PIN_MOTEUR2_BRK,LOW);
+  }
+}
+
 /* ------------------------------------------------------------------------
 * Mes fonctions
 ------------------------------------------------------------------------ */
@@ -76,8 +118,10 @@ int detecteDistance() {
   // Lecture de la distance
   // int x = analogRead(PIN_LECTURE_DISTANCE); 
   int x = litDistance();
-  Serial.print("PIN_LECTURE_DISTANCE : ");
-  Serial.println(x);
+  if(DEBUG){
+    Serial.print("PIN_LECTURE_DISTANCE : ");
+    Serial.println(x);
+  }
   
   if(x > 400) {
     return TRES_PRES;
@@ -112,17 +156,70 @@ int scanDirection(){
   // prend la distance a gauche
   distGauche = regardeVers(GAUCHE, true);
   // se remet droit
-  distDevant = regardeVers(DEVANT);
+  regardeVers(DEVANT);
 
   if(DEBUG)debug("scanDirection");
+}
+
+/*
+* Le robot avance à une certaine allure en fonction de la distance qu'il detecte devant lui
+*/
+void avance(){
+  int sensor = regardeVers(DEVANT, true);
+  
+  switch(sensor) {
+    case TRES_PRES:
+      moteurEnArriere();
+      moteurVitesse(RAPIDE,RAPIDE);
+      break;
+    case PRES:
+      moteurEnAvant();
+      moteurVitesse(STOP,STOP);
+      break;
+    case LOIN:
+      moteurEnAvant();
+      moteurVitesse(MOYEN,MOYEN);
+      break;
+    case RIEN:
+      moteurEnAvant();
+      moteurVitesse(RAPIDE,RAPIDE);
+      break;
+  }
+}
+
+/*
+* Arrete le robot
+*/
+void stop(){
+  moteurEnAvant();
+  moteurVitesse(STOP,STOP);
 }
 
 /*
 * Demande aux moteurs d'effectuer le travail pour faire tourner le robot comme désiré
 * Fonctionnement du moteur http://goo.gl/CQJaXp
 */
-void tourneRobot(int direction){
-  // TODO
+void tourneRobot(int direction){  
+  switch(direction) {
+    case DROITE:
+      moteurEnArriere();
+      moteurVitesse(LENT,STOP);
+      delay(TEMPS_ROTATION);
+      moteurVitesse(STOP,STOP);
+      break;
+    case GAUCHE:
+      moteurEnAvant();
+      moteurVitesse(STOP,LENT);
+      delay(TEMPS_ROTATION);
+      moteurVitesse(STOP,STOP);
+      break;
+    case DEMI_TOUR:
+      moteurEnAvant();
+      moteurVitesse(STOP,DROITE);
+      delay(TEMPS_ROTATION);
+      moteurVitesse(STOP,STOP);
+      break;
+  }
 }
 
 void debug(String texte){
@@ -174,13 +271,16 @@ void setup(){
 }
 
 void loop(){ 
-  // si obstacle
-  if(1 == 1){
-    // stop
-    choixDirection();
+  distDevant = regardeVers(DEVANT, true);
+  
+  // si obstacle devant pres
+  if(distDevant == TRES_PRES){
+    stop();
+    // determine la meilleure direction et y tourne le robot
+	choixDirection();
   }else{
-    // sinon avance
+	avance();
   } 
       
-  delay(TEMPS_CYCLE*1000); // donne un délai d'exécution pour les cycles
+  if(DEBUG)delay(TEMPS_CYCLE*1000); // donne un délai d'exécution pour les cycles
 }
