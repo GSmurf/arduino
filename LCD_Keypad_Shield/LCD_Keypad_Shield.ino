@@ -52,7 +52,7 @@ void setup()
 {
  lcd.begin(16, 2);              // start the library
  lcd.setCursor(0,0);
- lcd.print("Push the buttons"); // print a simple message
+ lcd.print("Bounton detecté :"); // print a simple message
 }
  
 void loop()
@@ -68,22 +68,22 @@ void loop()
  {
    case btnRIGHT:
      {
-     lcd.print("RIGHT ");
+     lcd.print("DROITE");
      break;
      }
    case btnLEFT:
      {
-     lcd.print("LEFT   ");
+     lcd.print("GAUCHE ");
      break;
      }
    case btnUP:
      {
-     lcd.print("UP    ");
+     lcd.print("HAUT  ");
      break;
      }
    case btnDOWN:
      {
-     lcd.print("DOWN  ");
+     lcd.print("BAS   ");
      break;
      }
    case btnSELECT:
@@ -93,7 +93,7 @@ void loop()
      }
      case btnNONE:
      {
-     lcd.print("NONE  ");
+     lcd.print("RIEN  ");
      break;
      }
  }
