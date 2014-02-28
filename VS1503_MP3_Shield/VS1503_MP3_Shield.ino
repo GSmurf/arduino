@@ -1,4 +1,5 @@
 /**************************************
+* Source : http://goo.gl/z5m987
 *
 *  Example for Sparkfun MP3 Shield Library
 *      By: Bill Porter
