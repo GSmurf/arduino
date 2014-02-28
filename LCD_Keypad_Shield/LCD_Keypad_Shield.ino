@@ -52,7 +52,7 @@ void setup()
 {
  lcd.begin(16, 2);              // start the library
  lcd.setCursor(0,0);
- lcd.print("Bounton detecté :"); // print a simple message
+ lcd.print("Bounton detecté:"); // print a simple message
 }
  
 void loop()
