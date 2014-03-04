@@ -19,8 +19,8 @@ const int PIN_MOTEUR2_BRK = 8;
 
 // DEBUG MODE
 const boolean DEBUG = true;
-const int TEMPS_CYCLE = 4; // EN SECONDES
-const int TEMPS_ROTATION = 2000; // TODO regler ce timing en milliseconde pour pouvoir être précis
+const int TEMPS_CYCLE = 2; // EN SECONDES
+const int TEMPS_ROTATION = 2000; // TODO regler le timing de rotation du robot en milliseconde pour pouvoir être précis
 
 /*
 * Constantes du programme
@@ -36,7 +36,7 @@ const int TRES_PRES    = 0;
 const int PRES         = 1;
 const int LOIN         = 2;
 const int RIEN         = 3;
-const int DISTANCE_MAX = 200; // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
+const int DISTANCE_MAX = 400; // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 
 // variable to store the servo position
 int pos = DEVANT;     
@@ -88,9 +88,15 @@ void moteurFreins(boolean active = true) {
 /*
 * Retourne la distance en durée, sinon posible en centimetre
 */
-long litDistance(boolean retourEnCm = false){
+long litDistance(boolean retourEnCm = true){
   unsigned int duration = sonar.ping();
-  
+  if(DEBUG){
+    Serial.print("distance : ");
+    Serial.print((duration / US_ROUNDTRIP_CM));
+    Serial.print(" cm (");
+    Serial.print(duration);
+    Serial.println(")");
+  }
   if(retourEnCm){
     return (duration / US_ROUNDTRIP_CM);
   }else{
@@ -102,29 +108,35 @@ long litDistance(boolean retourEnCm = false){
 int detecteDistance() {
   // Lecture de la distance
   int x = litDistance();
-  if(DEBUG){
-    Serial.print("Distance : ");
-    Serial.println(x);
-  }
   
-  if(x > 400) {
+  if(x < 4) {
     return TRES_PRES;
-  } else if(x > 300) {
+  } else if(x < 30) {
     return PRES;
-  } else if(x > 200) {
+  } else if(x < 45) {
     return LOIN;
   } else {
     return RIEN;
   }
 }
 
-int regardeVers(int angle, boolean retourneValeur=false){
-  pos = angle;
-  // tourne vers l'angle donné
-  digitalWrite(PIN_SERVO_MOTEUR,HIGH);
-  servo.write(pos);
-  digitalWrite(PIN_SERVO_MOTEUR,LOW);
-  delay(450); // ce timing est le plus bref posible tout en lui laissant le temps !
+int regardeVers(int angle, boolean retourneValeur=true){
+  if(DEBUG){
+    Serial.print("fonc regardeVers :");
+    Serial.print(angle);
+    Serial.print(", ");
+    Serial.println(retourneValeur);
+  }
+  
+  // Si la position demandé est différente de la position précédente alors envoi des ordres de deplacement au servo
+  if(pos != angle){
+    pos = angle;
+    // tourne vers l'angle donné
+    digitalWrite(PIN_SERVO_MOTEUR,HIGH);
+    servo.write(pos);
+    digitalWrite(PIN_SERVO_MOTEUR,LOW);
+    delay(450); // ce timing est le plus bref posible tout en lui laissant le temps !
+  }
   if(retourneValeur == true){
     // retourne la distance dans cette direction
     return detecteDistance();
@@ -136,9 +148,9 @@ int regardeVers(int angle, boolean retourneValeur=false){
 
 int scanDirection(){
   // prend la distance a droite
-  distDroite = regardeVers(DROITE, true);
+  distDroite = regardeVers(DROITE);
   // prend la distance a gauche
-  distGauche = regardeVers(GAUCHE, true);
+  distGauche = regardeVers(GAUCHE);
   // se remet droit
   regardeVers(DEVANT);
 
@@ -146,12 +158,10 @@ int scanDirection(){
 }
 
 /*
-* Le robot avance à une certaine allure en fonction de la distance qu'il detecte devant lui
+* Le robot avance à une certaine allure en fonction de la distance qu'il avait detecté devant lui dans la boucle loop
 */
 void avance(){
-  int sensor = regardeVers(DEVANT, true);
-  
-  switch(sensor) {
+  switch(distDevant) {
     case TRES_PRES:
       moteurEnArriere();
       moteurVitesse(RAPIDE,RAPIDE);
@@ -262,7 +272,7 @@ void setup(){
 }
 
 void loop(){ 
-  distDevant = regardeVers(DEVANT, true);
+  distDevant = regardeVers(DEVANT);
   
   // si obstacle devant pres
   if(distDevant == TRES_PRES){
