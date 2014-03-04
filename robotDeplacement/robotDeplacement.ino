@@ -36,7 +36,7 @@ const int TRES_PRES    = 0;
 const int PRES         = 1;
 const int LOIN         = 2;
 const int RIEN         = 3;
-const int DISTANCE_MAX = 200;
+const int DISTANCE_MAX = 200; // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 
 // variable to store the servo position
 int pos = DEVANT;     
