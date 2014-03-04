@@ -1,14 +1,17 @@
 /*
 * IA de déplacement du robot
 */
-#include <Servo.h> 
- 
-Servo myservo;  // create servo object to control a servo 
-const int PIN_LECTURE_DISTANCE = 0; // analogique
+#include <Servo.h>
+#include <NewPing.h> 
+
+// pins disponible : 1,2,4,5 ; a0,a1,a2,a3,a4,a5
+
+const int PIN_SONAR_TRIGGER = 7;
+const int PIN_SONAR_ECHO = 6; // Lien PWR 
 const int PIN_SERVO_MOTEUR = 9;
 
-const int PIN_MOTEUR1_PW = 3; // Lien PWR
-const int PIN_MOTEUR2_PW = 11; // Lien PWR
+const int PIN_MOTEUR1_PW  = 3; // Lien PWR
+const int PIN_MOTEUR2_PW  = 11; // Lien PWR
 const int PIN_MOTEUR1_DIR = 12;
 const int PIN_MOTEUR2_DIR = 13;
 const int PIN_MOTEUR1_BRK = 10;
@@ -29,10 +32,11 @@ const int GAUCHE     = 0;
 const int DEMI_TOUR  = 270;
 
 // Constantes de distance
-const int TRES_PRES 	= 0;
-const int PRES		= 1;
-const int LOIN		= 2;
-const int RIEN	        = 3;
+const int TRES_PRES    = 0;
+const int PRES         = 1;
+const int LOIN         = 2;
+const int RIEN         = 3;
+const int DISTANCE_MAX = 200;
 
 // variable to store the servo position
 int pos = DEVANT;     
@@ -41,17 +45,21 @@ int distDroite = TRES_PRES;
 int distGauche = TRES_PRES;
 int distDevant = TRES_PRES;
 
+// Déclaration du sonar
+NewPing sonar(PIN_SONAR_TRIGGER, PIN_SONAR_ECHO, DISTANCE_MAX); // NewPing setup of pins and maximum distance.
+Servo servo;  // create servo object to control a servo
+
 /* ------------------------------------------------------------------------
 * Code moteur
 ------------------------------------------------------------------------ */
-const int STOP = 0;
-const int LENT = 50;
-const int MOYEN = 75;
+const int STOP   = 0;
+const int LENT   = 50;
+const int MOYEN  = 75;
 const int RAPIDE = 100;
 
-void moteurVitesse(int left, int right) {
-  analogWrite(PIN_MOTEUR1_PW, left);
-  analogWrite(PIN_MOTEUR2_PW, right);
+void moteurVitesse(int vitGauche, int vitDroite) {
+  analogWrite(PIN_MOTEUR1_PW, vitGauche);
+  analogWrite(PIN_MOTEUR2_PW, vitDroite);
 }
 
 void moteurEnArriere() {
@@ -78,36 +86,13 @@ void moteurFreins(boolean active = true) {
 * Mes fonctions
 ------------------------------------------------------------------------ */
 /*
-* The speed of sound is 340 m/s or 29 microseconds per centimeter.
-* The ping travels out and back, so to find the distance of the
-* object we take half of the distance travelled.
-*/
-long microsecondsToCentimeters(long microseconds)
-{
-  return microseconds / 29 / 2;
-}
-
-/*
 * Retourne la distance en durée, sinon posible en centimetre
-* cf : http://goo.gl/0Co9nL
 */
 long litDistance(boolean retourEnCm = false){
-  long duration;
-  pinMode(PIN_LECTURE_DISTANCE, OUTPUT);
-  digitalWrite(PIN_LECTURE_DISTANCE, LOW);
-  delayMicroseconds(2);
-  digitalWrite(PIN_LECTURE_DISTANCE, HIGH);
-  delayMicroseconds(5);
-  digitalWrite(PIN_LECTURE_DISTANCE, LOW);
-
-  // The same pin is used to read the signal from the PING))): a HIGH
-  // pulse whose duration is the time (in microseconds) from the sending
-  // of the ping to the reception of its echo off of an object.
-  pinMode(PIN_LECTURE_DISTANCE, INPUT);
-  duration = pulseIn(PIN_LECTURE_DISTANCE, HIGH);
+  unsigned int duration = sonar.ping();
   
   if(retourEnCm){
-    return microsecondsToCentimeters(duration);
+    return (duration / US_ROUNDTRIP_CM);
   }else{
     return duration;
   }
@@ -116,10 +101,9 @@ long litDistance(boolean retourEnCm = false){
 // prend la mesure
 int detecteDistance() {
   // Lecture de la distance
-  // int x = analogRead(PIN_LECTURE_DISTANCE); 
   int x = litDistance();
   if(DEBUG){
-    Serial.print("PIN_LECTURE_DISTANCE : ");
+    Serial.print("Distance : ");
     Serial.println(x);
   }
   
@@ -138,7 +122,7 @@ int regardeVers(int angle, boolean retourneValeur=false){
   pos = angle;
   // tourne vers l'angle donné
   digitalWrite(PIN_SERVO_MOTEUR,HIGH);
-  myservo.write(pos);
+  servo.write(pos);
   digitalWrite(PIN_SERVO_MOTEUR,LOW);
   delay(450); // ce timing est le plus bref posible tout en lui laissant le temps !
   if(retourneValeur == true){
@@ -263,7 +247,6 @@ void choixDirection(){
 * Lancement du programme
 ------------------------------------------------------------------------ */
 void setup(){
-  pinMode(PIN_LECTURE_DISTANCE, INPUT);
   pinMode(PIN_SERVO_MOTEUR, OUTPUT);
 
   pinMode(PIN_MOTEUR1_PW, OUTPUT);  //Set control pins to be outputs
@@ -271,7 +254,7 @@ void setup(){
   pinMode(PIN_MOTEUR1_DIR, OUTPUT);
   pinMode(PIN_MOTEUR2_DIR, OUTPUT);
    
-  myservo.attach(PIN_SERVO_MOTEUR);  // attaches the servo on pin 9 to the servo object
+  servo.attach(PIN_SERVO_MOTEUR);  // attaches the servo on pin 9 to the servo object
   if(DEBUG)Serial.begin(9600);
   regardeVers(DEVANT);
   moteurFreins(false);
