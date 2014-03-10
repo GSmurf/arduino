@@ -1,10 +1,11 @@
 /*
 * IA de déplacement du robot
+* Le moteur 1 est le moteur de gauche, le 2 le droite
 */
 #include <Servo.h>
 #include <NewPing.h> 
 
-// pins disponible : 1,2,4,5 ; a0,a1,a2,a3,a4,a5
+// pins disponible : 1,2,5,8,10,12 ; a0,a1,a2,a3,a4,a5
 
 const int PIN_SONAR_TRIGGER = 13;
 const int PIN_SONAR_ECHO = 11; // Lien PWR ~
@@ -14,8 +15,6 @@ const int PIN_MOTEUR1_PW  = 3; // Lien PWR ~
 const int PIN_MOTEUR2_PW  = 6; // Lien PWR ~
 const int PIN_MOTEUR1_DIR = 4;
 const int PIN_MOTEUR2_DIR = 7;
-const int PIN_MOTEUR1_BRK = 10; // non utilisé normalement
-const int PIN_MOTEUR2_BRK = 8; // non utilisé normalement
 
 // DEBUG MODE
 const boolean DEBUG = true;
@@ -62,32 +61,31 @@ void moteurVitesse(int vitGauche, int vitDroite) {
   analogWrite(PIN_MOTEUR2_PW, vitDroite);
 }
 
-void moteurEnArriere() {
-  digitalWrite(PIN_MOTEUR1_DIR,LOW);
-  digitalWrite(PIN_MOTEUR2_DIR,LOW);
-}
-
 void moteurEnAvant() {
   digitalWrite(PIN_MOTEUR1_DIR,HIGH);
   digitalWrite(PIN_MOTEUR2_DIR,HIGH);
 }
 
-void moteurFreins(boolean active = true) {
-  if(active){
-    digitalWrite(PIN_MOTEUR1_BRK,HIGH);
-    digitalWrite(PIN_MOTEUR2_BRK,HIGH);
-  }else{
-    digitalWrite(PIN_MOTEUR1_BRK,LOW);
-    digitalWrite(PIN_MOTEUR2_BRK,LOW);
-  }
+void moteurEnArriere() {
+  digitalWrite(PIN_MOTEUR1_DIR,LOW);
+  digitalWrite(PIN_MOTEUR2_DIR,LOW);
 }
 
+// Permet de tourner vite à droite
+void moteurTourneADroite() {
+  digitalWrite(PIN_MOTEUR1_DIR,HIGH);
+  digitalWrite(PIN_MOTEUR2_DIR,LOW);
+}
+
+// Permet de tourner vite à gauche
+void moteurTourneAGauche() {
+  digitalWrite(PIN_MOTEUR1_DIR,LOW);
+  digitalWrite(PIN_MOTEUR2_DIR,HIGH);
+}
 /* ------------------------------------------------------------------------
 * Mes fonctions
 ------------------------------------------------------------------------ */
-/*
-* Retourne la distance en durée, sinon posible en centimetre
-*/
+// Retourne la distance en durée, sinon posible en centimetre
 long litDistance(boolean retourEnCm = true){
   unsigned int duration = sonar.ping();
   if(DEBUG){
@@ -104,7 +102,7 @@ long litDistance(boolean retourEnCm = true){
   }
 }
 
-// prend la mesure
+// Retourne des constantes en fonction de la distance lue en cm
 int detecteDistance() {
   // Lecture de la distance
   int x = litDistance();
@@ -120,6 +118,7 @@ int detecteDistance() {
   }
 }
 
+// Tourne le sonar dans une direction et renvoi la distance
 int regardeVers(int angle, boolean retourneValeur=true){
   if(DEBUG){
     Serial.print("fonc regardeVers :");
@@ -146,6 +145,7 @@ int regardeVers(int angle, boolean retourneValeur=true){
   }
 }
 
+// Retourne les distances dans les directions DROITE, GAUCHE, DEVANT
 int scanDirection(){
   // prend la distance a droite
   distDroite = regardeVers(DROITE);
@@ -158,31 +158,7 @@ int scanDirection(){
 }
 
 /*
-* Le robot avance à une certaine allure en fonction de la distance qu'il avait detecté devant lui dans la boucle loop
-*/
-void avance(){
-  switch(distDevant) {
-    case TRES_PRES:
-      moteurEnArriere();
-      moteurVitesse(RAPIDE,RAPIDE);
-      break;
-    case PRES:
-      moteurEnAvant();
-      moteurVitesse(LENT,LENT);
-      break;
-    case LOIN:
-      moteurEnAvant();
-      moteurVitesse(MOYEN,MOYEN);
-      break;
-    case RIEN:
-      moteurEnAvant();
-      moteurVitesse(RAPIDE,RAPIDE);
-      break;
-  }
-}
-
-/*
-* Arrete le robot
+* Arrete le robot et le reinitiale en mode marche avant
 */
 void stop(){
   moteurEnAvant();
@@ -196,24 +172,20 @@ void stop(){
 void tourneRobot(int direction){  
   switch(direction) {
     case DROITE:
-      moteurEnArriere();
-      moteurVitesse(LENT,STOP);
-      delay(TEMPS_ROTATION);
-      moteurVitesse(STOP,STOP);
+      moteurTourneADroite();
+      moteurVitesse(LENT,LENT);
       break;
     case GAUCHE:
-      moteurEnAvant();
-      moteurVitesse(STOP,LENT);
-      delay(TEMPS_ROTATION);
-      moteurVitesse(STOP,STOP);
+      moteurTourneAGauche();
+      moteurVitesse(LENT,LENT);
       break;
     case DEMI_TOUR:
-      moteurEnAvant();
-      moteurVitesse(STOP,DROITE);
-      delay(TEMPS_ROTATION);
-      moteurVitesse(STOP,STOP);
+      moteurTourneADroite();
+      moteurVitesse(MOYEN,MOYEN);
       break;
   }
+  delay(TEMPS_ROTATION);
+  stop();
 }
 
 void debug(String texte){
@@ -234,17 +206,42 @@ void debug(String texte){
 }
 
 /*
-* Si retourne valeur et true alors renvois la distance dans cette direction
+* Le robot avance à une certaine allure en fonction de la distance 
+* qu'il avait detecté devant lui dans la boucle loop
+* TODO : faire en sorte qu'il renvoi un boolean pour savoir s'il avance ou non
 */
-void choixDirection(){
+void ia_avanceAllure(){
+  switch(distDevant) {
+    case TRES_PRES:
+      stop();
+      break;
+    case PRES:
+      moteurEnAvant();
+      moteurVitesse(LENT,LENT);
+      break;
+    case LOIN:
+      moteurEnAvant();
+      moteurVitesse(MOYEN,MOYEN);
+      break;
+    case RIEN:
+      moteurEnAvant();
+      moteurVitesse(RAPIDE,RAPIDE);
+      break;
+  }
+}
+
+/*
+* Scan la direction la plus courte pour y tourner le robot
+*/
+void ia_choixDirection(){
   scanDirection();
   // si la distance à droite et à gauche est courte alors
   if((distDroite == TRES_PRES) && (distGauche == TRES_PRES)){
     // fait demi tour
     tourneRobot(DEMI_TOUR);
   }else{
-    // si la distance à droite et plus courte alors
-    if(distDroite < distGauche){
+    // si la distance à droite et la plus courte ou egale à gauche alors
+    if(distDroite <= distGauche){
       // tourne à droite
       tourneRobot(DROITE);
     }else{
@@ -253,6 +250,17 @@ void choixDirection(){
     }
   }
 }
+
+// Viens tater l'obstacle devant lui
+void ia_essayeDePasser(){}
+
+// Suis l'obstacle devant lui
+void ia_suisUneCible(){}
+
+// Va se ranger dans le coin cardinal demandé
+void ia_vaSeRangerDansLeCoin(){}
+
+
 /* ------------------------------------------------------------------------
 * Lancement du programme
 ------------------------------------------------------------------------ */
@@ -267,21 +275,21 @@ void setup(){
   servo.attach(PIN_SERVO_MOTEUR);  // attaches the servo on pin 9 to the servo object
   if(DEBUG)Serial.begin(9600);
   regardeVers(DEVANT);
-//  moteurFreins(false);
   stop();
 }
 
 void loop(){ 
-  distDevant = regardeVers(DEVANT);
+  distDevant = regardeVers(DEVANT); // scan la distance DEVANT
   
-  // si obstacle devant pres
+  // Si un obstacle est pres alors tourne
   if(distDevant == TRES_PRES){
     stop();
     // determine la meilleure direction et y tourne le robot
-	choixDirection();
+	ia_choixDirection();
   }else{
-	avance();
+    // sinon determine son allure en fonction de la distance à un potentiel obstacle
+	ia_avanceAllure();
   } 
       
-  if(DEBUG)delay(TEMPS_CYCLE*1000); // donne un délai d'exécution pour les cycles
+  // if(DEBUG)delay(TEMPS_CYCLE*1000); // donne un délai d'exécution pour les cycles
 }
