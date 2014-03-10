@@ -260,6 +260,25 @@ void ia_suisUneCible(){}
 // Va se ranger dans le coin cardinal demandé
 void ia_vaSeRangerDansLeCoin(){}
 
+// Detecte ou es la cible
+int ia_chercheAngleCible(int ancienneDistance){
+	int i;
+	float tolerance = 0.1;
+	int distMax = int(ancienneDistance + (ancienneDistance*tolerance));
+	int distMin = int(ancienneDistance - (ancienneDistance*tolerance));
+	int angle = 90;
+	int distance;
+	int angles[] = {0,36,72,108,144,180};
+	for (i = 0; i < 6; i = i + 1) {
+	  distance = regardeVers(angles[i]);
+	  if((distance <= distMax) && (distMax >= distMin)){
+	  angle = angles[i];
+	  }
+	}
+		
+	return angle;
+}
+
 
 /* ------------------------------------------------------------------------
 * Lancement du programme
