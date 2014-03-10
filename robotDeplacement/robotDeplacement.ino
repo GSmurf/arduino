@@ -6,16 +6,16 @@
 
 // pins disponible : 1,2,4,5 ; a0,a1,a2,a3,a4,a5
 
-const int PIN_SONAR_TRIGGER = 7;
-const int PIN_SONAR_ECHO = 6; // Lien PWR 
+const int PIN_SONAR_TRIGGER = 13;
+const int PIN_SONAR_ECHO = 11; // Lien PWR ~
 const int PIN_SERVO_MOTEUR = 9;
 
-const int PIN_MOTEUR1_PW  = 3; // Lien PWR
-const int PIN_MOTEUR2_PW  = 11; // Lien PWR
-const int PIN_MOTEUR1_DIR = 12;
-const int PIN_MOTEUR2_DIR = 13;
-const int PIN_MOTEUR1_BRK = 10;
-const int PIN_MOTEUR2_BRK = 8;
+const int PIN_MOTEUR1_PW  = 3; // Lien PWR ~
+const int PIN_MOTEUR2_PW  = 6; // Lien PWR ~
+const int PIN_MOTEUR1_DIR = 4;
+const int PIN_MOTEUR2_DIR = 7;
+const int PIN_MOTEUR1_BRK = 10; // non utilisé normalement
+const int PIN_MOTEUR2_BRK = 8; // non utilisé normalement
 
 // DEBUG MODE
 const boolean DEBUG = true;
@@ -53,8 +53,8 @@ Servo servo;  // create servo object to control a servo
 * Code moteur
 ------------------------------------------------------------------------ */
 const int STOP   = 0;
-const int LENT   = 50;
-const int MOYEN  = 75;
+const int LENT   = 35;
+const int MOYEN  = 50;
 const int RAPIDE = 100;
 
 void moteurVitesse(int vitGauche, int vitDroite) {
@@ -63,13 +63,13 @@ void moteurVitesse(int vitGauche, int vitDroite) {
 }
 
 void moteurEnArriere() {
-  digitalWrite(PIN_MOTEUR1_DIR,HIGH);
-  digitalWrite(PIN_MOTEUR2_DIR,HIGH);
+  digitalWrite(PIN_MOTEUR1_DIR,LOW);
+  digitalWrite(PIN_MOTEUR2_DIR,LOW);
 }
 
 void moteurEnAvant() {
-  digitalWrite(PIN_MOTEUR1_DIR,LOW);
-  digitalWrite(PIN_MOTEUR2_DIR,LOW);
+  digitalWrite(PIN_MOTEUR1_DIR,HIGH);
+  digitalWrite(PIN_MOTEUR2_DIR,HIGH);
 }
 
 void moteurFreins(boolean active = true) {
@@ -168,7 +168,7 @@ void avance(){
       break;
     case PRES:
       moteurEnAvant();
-      moteurVitesse(STOP,STOP);
+      moteurVitesse(LENT,LENT);
       break;
     case LOIN:
       moteurEnAvant();
@@ -267,7 +267,7 @@ void setup(){
   servo.attach(PIN_SERVO_MOTEUR);  // attaches the servo on pin 9 to the servo object
   if(DEBUG)Serial.begin(9600);
   regardeVers(DEVANT);
-  moteurFreins(false);
+//  moteurFreins(false);
   stop();
 }
 
