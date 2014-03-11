@@ -2,10 +2,13 @@
 * IA de déplacement du robot
 * Le moteur 1 est le moteur de gauche, le 2 le droite
 */
-#include <Servo.h>
-#include <NewPing.h> 
+#include "Wire.h" // gestion du compass
+#include "I2Cdev.h" // gestion du compass
+#include "HMC5883L.h" // gestion du compass
+#include <Servo.h> // gestion du servo moteur
+#include <NewPing.h> // gestion du sonar
 
-// pins disponible : 1,2,5,8,10,12 ; a0,a1,a2,a3,a4,a5
+// pins disponible : 1,2,5,8,10,12 ; A2,A3,A4,A5
 
 const int PIN_SONAR_TRIGGER = 13;
 const int PIN_SONAR_ECHO = 11; // Lien PWR ~
@@ -16,10 +19,12 @@ const int PIN_MOTEUR2_PW  = 6; // Lien PWR ~
 const int PIN_MOTEUR1_DIR = 4;
 const int PIN_MOTEUR2_DIR = 7;
 
+const int PIN_COMPASS1 = A0; // Lien analogique a0 pour le compass
+const int PIN_COMPASS2 = A1; // Lien analogique a1 pour le compass
+
 // DEBUG MODE
 const boolean DEBUG = true;
 const int TEMPS_CYCLE = 2; // EN SECONDES
-const int TEMPS_ROTATION = 2000; // TODO regler le timing de rotation du robot en milliseconde pour pouvoir être précis
 
 /*
 * Constantes du programme
@@ -48,6 +53,9 @@ int distDevant = TRES_PRES;
 NewPing sonar(PIN_SONAR_TRIGGER, PIN_SONAR_ECHO, DISTANCE_MAX); // NewPing setup of pins and maximum distance.
 Servo servo;  // create servo object to control a servo
 
+// Déclaration pour le compass
+HMC5883L mag;
+int16_t mx, my, mz;
 /* ------------------------------------------------------------------------
 * Code moteur
 ------------------------------------------------------------------------ */
@@ -81,6 +89,25 @@ void moteurTourneADroite() {
 void moteurTourneAGauche() {
   digitalWrite(PIN_MOTEUR1_DIR,LOW);
   digitalWrite(PIN_MOTEUR2_DIR,HIGH);
+}
+/* ------------------------------------------------------------------------
+* Fonctions compass
+------------------------------------------------------------------------ */
+// Lit la direction du compass
+float litDirection(boolean arrondi = true) {
+  // read raw heading measurements from device
+  mag.getHeading(&mx, &my, &mz);
+
+  // To calculate heading in degrees. 0 degree indicates North
+  float heading = atan2(mz, mx);
+  if(heading < 0)
+    heading += 2 * M_PI;
+  
+  if(arrondi){
+    return (int((heading * 180/M_PI)));
+  }else{
+    return (heading * 180/M_PI);
+  }
 }
 /* ------------------------------------------------------------------------
 * Mes fonctions
@@ -170,6 +197,9 @@ void stop(){
 * Fonctionnement du moteur http://goo.gl/CQJaXp
 */
 void tourneRobot(int direction){  
+  float positionDebut = litDirection();
+  float positionActuelle;
+  
   switch(direction) {
     case DROITE:
       moteurTourneADroite();
@@ -184,27 +214,28 @@ void tourneRobot(int direction){
       moteurVitesse(MOYEN,MOYEN);
       break;
   }
-  delay(TEMPS_ROTATION);
+  // TODO : calcule la postition d'arrivée
+  float positionArrive = positionDebut + direction;
+  
+  // TODO : tourne tant que la direction attendu n'est pas atteinte
+  do{
+    delay(50);          // wait for sensors to stabilize
+    positionActuelle = litDirection();  // check the sensors  
+  } while (positionActuelle != positionArrive);
+  
   stop();
 }
 
 void debug(String texte){
-  String titre = "*** "+texte+" ***";
-  Serial.println(titre);
-  
-  Serial.print("Droite : ");
-  Serial.print(distDroite);
-  Serial.print(", Gauche : ");
-  Serial.print(distGauche);
-  Serial.print(", Devant : ");
-  Serial.println(distDevant);
-  
-  Serial.print("Position : ");
-  Serial.println(pos);
-  
+  Serial.print("*** ");Serial.print(texte);Serial.println(" ***");  
+  Serial.print("Droite :\t");Serial.print(distDroite);Serial.print("\tGauche :\t");Serial.print(distGauche);Serial.print("\tDevant :\t");Serial.println(distDevant);
+  Serial.print("Position :\t");Serial.println(pos);
   Serial.println("---");
 }
 
+/* ------------------------------------------------------------------------
+* Fonctions IA
+------------------------------------------------------------------------ */
 /*
 * Le robot avance à une certaine allure en fonction de la distance 
 * qu'il avait detecté devant lui dans la boucle loop
@@ -278,12 +309,15 @@ int ia_chercheAngleCible(int ancienneDistance){
 		
 	return angle;
 }
-
-
 /* ------------------------------------------------------------------------
 * Lancement du programme
 ------------------------------------------------------------------------ */
 void setup(){
+  // initialisation pour le compass
+  Wire.begin(); 
+  mag.initialize();
+  mag.testConnection();
+  
   pinMode(PIN_SERVO_MOTEUR, OUTPUT);
 
   pinMode(PIN_MOTEUR1_PW, OUTPUT);  //Set control pins to be outputs
