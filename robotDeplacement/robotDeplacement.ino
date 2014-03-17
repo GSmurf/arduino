@@ -217,10 +217,12 @@ void tourneRobot(int direction){
   // TODO : calcule la postition d'arrivée
   float positionArrive = positionDebut + direction;
   
-  // TODO : tourne tant que la direction attendu n'est pas atteinte
+  // TODO : tourne tant que la direction attendu n'est pas atteinte 
+  /* A MODIFIER : l'angle à atteindre doit être une echelle et de 0 a 360 car sinon inategnable et boucle infinie !!! */
   do{
     delay(50);          // wait for sensors to stabilize
     positionActuelle = litDirection();  // check the sensors  
+    if(DEBUG)debugRotation(direction, positionDebut, positionArrive, positionActuelle); 
   } while (positionActuelle != positionArrive);
   
   stop();
@@ -230,6 +232,12 @@ void debug(String texte){
   Serial.print("*** ");Serial.print(texte);Serial.println(" ***");  
   Serial.print("Droite :\t");Serial.print(distDroite);Serial.print("\tGauche :\t");Serial.print(distGauche);Serial.print("\tDevant :\t");Serial.println(distDevant);
   Serial.print("Position :\t");Serial.println(pos);
+  Serial.println("---");
+}
+
+void debugRotation(float direction, float positionDebut, float positionArrive, float positionActuelle){
+  Serial.print("*** ");Serial.print("DebugRotation , direction : \t");Serial.print(direction);Serial.println(" ***");  
+  Serial.print("positionDebut :\t");Serial.print(positionDebut);Serial.print("\tpositionArrive :\t");Serial.print(positionArrive);Serial.print("\tpositionActuelle :\t");Serial.println(positionActuelle);
   Serial.println("---");
 }
 
