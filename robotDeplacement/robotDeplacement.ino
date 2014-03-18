@@ -24,7 +24,8 @@ const int PIN_COMPASS2 = A1; // Lien analogique a1 pour le compass
 
 // DEBUG MODE
 const boolean DEBUG = true;
-const int TEMPS_CYCLE = 2; // EN SECONDES
+const int TEMPS_CYCLE = 20; // en millisecondes
+const float TOLERANCE_ROTATION = 0.10; // pourcentage de la tolerance pour la rotation
 
 /*
 * Constantes du programme
@@ -94,7 +95,7 @@ void moteurTourneAGauche() {
 * Fonctions compass
 ------------------------------------------------------------------------ */
 // Lit la direction du compass
-float litDirection(boolean arrondi = true) {
+float litDirection() {
   // read raw heading measurements from device
   mag.getHeading(&mx, &my, &mz);
 
@@ -103,11 +104,7 @@ float litDirection(boolean arrondi = true) {
   if(heading < 0)
     heading += 2 * M_PI;
   
-  if(arrondi){
-    return (int((heading * 180/M_PI)));
-  }else{
-    return (heading * 180/M_PI);
-  }
+  return (heading * 180/M_PI);
 }
 /* ------------------------------------------------------------------------
 * Mes fonctions
@@ -198,7 +195,8 @@ void stop(){
 */
 void tourneRobot(int direction){  
   float positionDebut = litDirection();
-  float positionActuelle;
+  float positionActuelle = litDirection();
+  int positionMax, positionMin;
   
   switch(direction) {
     case DROITE:
@@ -214,16 +212,18 @@ void tourneRobot(int direction){
       moteurVitesse(MOYEN,MOYEN);
       break;
   }
-  // TODO : calcule la postition d'arrivée
+  // Calcule la postition d'arrivée
   float positionArrive = positionDebut + direction;
   
-  // TODO : tourne tant que la direction attendu n'est pas atteinte 
-  /* A MODIFIER : l'angle à atteindre doit être une echelle et de 0 a 360 car sinon inategnable et boucle infinie !!! */
+  positionMin = int(positionArrive - (positionArrive * TOLERANCE_ROTATION)) % 360;
+  positionMax = int(positionArrive + (positionArrive * TOLERANCE_ROTATION)) % 360;
+  
+  // Tourne tant que la direction attendu n'est pas atteinte 
   do{
-    delay(50);          // wait for sensors to stabilize
-    positionActuelle = litDirection();  // check the sensors  
-    if(DEBUG)debugRotation(direction, positionDebut, positionArrive, positionActuelle); 
-  } while (positionActuelle != positionArrive);
+    delay(50); // wait for sensors to stabilize
+    positionActuelle = litDirection();
+    if(DEBUG)debugRotation(direction, positionDebut, positionActuelle, positionMin, positionMax); 
+  } while (!((positionActuelle > positionMin) && (positionActuelle < positionMax)));
   
   stop();
 }
@@ -235,9 +235,12 @@ void debug(String texte){
   Serial.println("---");
 }
 
-void debugRotation(float direction, float positionDebut, float positionArrive, float positionActuelle){
+void debugRotation(float direction, float positionDebut, float positionActuelle, int positionMin, int positionMax){
   Serial.print("*** ");Serial.print("DebugRotation , direction : \t");Serial.print(direction);Serial.println(" ***");  
-  Serial.print("positionDebut :\t");Serial.print(positionDebut);Serial.print("\tpositionArrive :\t");Serial.print(positionArrive);Serial.print("\tpositionActuelle :\t");Serial.println(positionActuelle);
+  Serial.print("Debut :\t");Serial.print(positionDebut);
+  Serial.print("\tActuelle :\t");Serial.print(positionActuelle);
+  Serial.print("\tMin :\t");Serial.print(positionMin);
+  Serial.print("\tMax :\t");Serial.println(positionMax);
   Serial.println("---");
 }
 
@@ -314,7 +317,7 @@ int ia_chercheAngleCible(int ancienneDistance){
 	  angle = angles[i];
 	  }
 	}
-		
+
 	return angle;
 }
 /* ------------------------------------------------------------------------
@@ -352,5 +355,5 @@ void loop(){
 	ia_avanceAllure();
   } 
       
-  // if(DEBUG)delay(TEMPS_CYCLE*1000); // donne un délai d'exécution pour les cycles
+  if(DEBUG)delay(TEMPS_CYCLE);
 }
