@@ -31,10 +31,10 @@ const float TOLERANCE_ROTATION = 0.10; // pourcentage de la tolerance pour la ro
 * Constantes du programme
 */
 // Constantes de direction
-const int DEVANT     = 90;
-const int DROITE     = 180;
-const int GAUCHE     = 0;
-const int DEMI_TOUR  = 270;
+const int DEVANT     = 0;
+const int DROITE     = 90;
+const int GAUCHE     = -90;
+const int DEMI_TOUR  = 180;
 
 // Constantes de distance
 const int TRES_PRES    = 0;
@@ -44,7 +44,7 @@ const int RIEN         = 3;
 const int DISTANCE_MAX = 400; // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 
 // variable to store the servo position
-int pos = DEVANT;     
+int pos = getAngleServo(DEVANT);     
 // Distances percues par le robot
 int distDroite = TRES_PRES;
 int distGauche = TRES_PRES;
@@ -142,14 +142,15 @@ int detecteDistance() {
   }
 }
 
+int getAngleServo(int angle){
+	return angle+90;
+}
+
 // Tourne le sonar dans une direction et renvoi la distance
 int regardeVers(int angle, boolean retourneValeur=true){
-  if(DEBUG){
-    Serial.print("fonc regardeVers :");
-    Serial.print(angle);
-    Serial.print(", ");
-    Serial.println(retourneValeur);
-  }
+  if(DEBUG)Serial.print("fonc regardeVers :");Serial.print(angle);Serial.print(", ");Serial.println(retourneValeur);
+  
+  angle = getAngleServo(angle); // converti l'angle pour le servo moteur
   
   // Si la position demandé est différente de la position précédente alors envoi des ordres de deplacement au servo
   if(pos != angle){
