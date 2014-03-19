@@ -24,7 +24,7 @@ const int PIN_COMPASS2 = A1; // Lien analogique a1 pour le compass
 
 // DEBUG MODE
 const boolean DEBUG = true;
-const int TEMPS_CYCLE = 1000; // en millisecondes
+const int TEMPS_CYCLE = 10; // en millisecondes
 const float TOLERANCE_ROTATION = 0.10; // pourcentage de la tolerance pour la rotation
 
 /*
@@ -131,7 +131,7 @@ int detecteDistance() {
   // Lecture de la distance
   int x = litDistance();
   
-  if(x < 4) {
+  if(x < 6) {
     return TRES_PRES;
   } else if(x < 30) {
     return PRES;
