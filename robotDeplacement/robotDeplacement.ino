@@ -61,9 +61,9 @@ int16_t mx, my, mz;
 * Code moteur
 ------------------------------------------------------------------------ */
 const int STOP   = 0;
-const int LENT   = 35;
-const int MOYEN  = 50;
-const int RAPIDE = 100;
+const int LENT   = 50;
+const int MOYEN  = 125;
+const int RAPIDE = 255;
 
 void moteurVitesse(int vitGauche, int vitDroite) {
   analogWrite(PIN_MOTEUR1_PW, vitGauche);
