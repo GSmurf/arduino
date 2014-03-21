@@ -61,7 +61,7 @@ int16_t mx, my, mz;
 * Code moteur
 ------------------------------------------------------------------------ */
 const int STOP   = 0;
-const int LENT   = 50;
+const int LENT   = 75;
 const int MOYEN  = 125;
 const int RAPIDE = 255;
 
@@ -83,12 +83,12 @@ void moteurEnArriere() {
 // Permet de tourner vite à droite
 void moteurTourneADroite() {
   digitalWrite(PIN_MOTEUR1_DIR,HIGH);
-  digitalWrite(PIN_MOTEUR2_DIR,LOW);
+  digitalWrite(PIN_MOTEUR2_DIR,HIGH);
 }
 
 // Permet de tourner vite à gauche
 void moteurTourneAGauche() {
-  digitalWrite(PIN_MOTEUR1_DIR,LOW);
+  digitalWrite(PIN_MOTEUR1_DIR,HIGH);
   digitalWrite(PIN_MOTEUR2_DIR,HIGH);
 }
 /* ------------------------------------------------------------------------
@@ -202,11 +202,11 @@ void tourneRobot(int direction){
   switch(direction) {
     case DROITE:
       moteurTourneADroite();
-      moteurVitesse(LENT,LENT);
+      moteurVitesse(MOYEN,STOP);
       break;
     case GAUCHE:
       moteurTourneAGauche();
-      moteurVitesse(LENT,LENT);
+      moteurVitesse(STOP,MOYEN);
       break;
     case DEMI_TOUR:
       moteurTourneADroite();
