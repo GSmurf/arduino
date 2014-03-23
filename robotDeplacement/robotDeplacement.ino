@@ -172,15 +172,15 @@ void tourneRobot(int direction){
   
   switch(direction) {
     case DROITE:
-      moteurEnAvant();
-      moteurVitesse(LENT,STOP);
-      break;
-    case GAUCHE:
-      moteurEnAvant();
+      moteurEnArriere();
       moteurVitesse(STOP,LENT);
       break;
+    case GAUCHE:
+      moteurEnArriere();
+      moteurVitesse(LENT,STOP);
+      break;
     case DEMI_TOUR:
-      moteurEnAvant();
+      moteurEnArriere();
       moteurVitesse(MOYEN,STOP);
       break;
   }
