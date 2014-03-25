@@ -79,3 +79,11 @@ int ia_chercheAngleCible(int ancienneDistance){
 
 	return angle;
 }
+
+void ia_vaVersLObjetLePlusProche(){
+	// Cherche la cible
+	int angleCible = ia_chercheAngleCible(int ancienneDistance);
+	// Se dirige vers elle
+	
+	stop();
+}
