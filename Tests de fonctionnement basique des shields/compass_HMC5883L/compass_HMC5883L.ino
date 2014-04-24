@@ -76,12 +76,17 @@ void loop() {
 
     // display tab-separated gyro x/y/z values
     Serial.print("mag:\t");
+    Serial.print(mx); Serial.print("\t");
+    Serial.print(my); Serial.print("\t");
+    Serial.print(mz); Serial.print("\t");
     
 // To calculate heading in degrees. 0 degree indicates North
     float heading2 = atan2(mz, mx);
+    float heading = atan2(my, mx);
     if(heading2 < 0)
       heading2 += 2 * M_PI;
-    Serial.print("Arrondi : \t"); Serial.print(int((heading2 * 180/M_PI))); Serial.print("\t");
+    Serial.print("Arrondi 2 : \t"); Serial.print(int((heading2 * 180/M_PI))); Serial.print("\t");
+    Serial.print("Arrondi : \t"); Serial.print(int((heading * 180/M_PI))); Serial.print("\t");
     Serial.print("Direction : \t");
     Serial.println(heading2 * 180/M_PI);
 
